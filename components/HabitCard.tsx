@@ -1,39 +1,39 @@
-"use client"
+'use client'
 
-import { getMonthName } from "@/lib/dateUtils";
-import { format } from "date-fns";
-import { Trash2 } from "lucide-react";
-import { Button } from "./ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
+import { getMonthName } from "@/lib/dateUtils"
+import { format } from "date-fns"
+import { Trash2 } from "lucide-react"
+import { Button } from "./ui/button"
+import { Card, CardHeader, CardTitle, CardContent } from "./ui/card"
 
 interface Habit {
-  id: string;
-  name: string;
-  checkedDays: Set<string>;
+  id: string
+  name: string
+  checkedDays: Set<string>
 }
 
 const getDaysInMonth = (date: Date): Date[] => {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const year = date.getFullYear()
+  const month = date.getMonth()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
   
   return Array.from({ length: daysInMonth }, (_, i) => 
     new Date(year, month, i + 1)
-  );
-};
+  )
+}
 
 export const HabitCard = ({
   habit,
   onToggleDay,
   onDelete
 }: {
-  habit: Habit;
-  onToggleDay: (habitId: string, date: string) => void;
-  onDelete: (habitId: string) => void;
+  habit: Habit
+  onToggleDay: (habitId: string, date: string) => void
+  onDelete: (habitId: string) => void
 }) => {
-  const currentDate = new Date();
-  const daysInMonth = getDaysInMonth(currentDate);
-  const monthName = getMonthName(currentDate);
+  const currentDate = new Date()
+  const daysInMonth = getDaysInMonth(currentDate)
+  const monthName = getMonthName(currentDate)
 
   return (
     <Card className="mb-4">
@@ -52,26 +52,27 @@ export const HabitCard = ({
         <div className="text-sm font-medium mb-2">{monthName}</div>
         <div className="grid grid-cols-7 gap-1">
           {daysInMonth.map(day => {
-            const dateStr = format(day, 'yyyy-MM-dd');
-            const dayNum = day.getDate();
-            const isToday = format(currentDate, 'yyyy-MM-dd') === dateStr;
+            const dateStr = format(day, 'yyyy-MM-dd')
+            const dayNum = day.getDate()
+            const isToday = format(currentDate, 'yyyy-MM-dd') === dateStr
+            const isChecked = habit.checkedDays.has(dateStr)
             
             return (
               <Button
                 key={dateStr}
-                variant={habit.checkedDays.has(dateStr) ? "default" : "outline"}
-                size="sm"
-                className={`aspect-square ${
-                  isToday ? 'ring-2 ring-offset-1 ring-blue-500' : ''
+                variant={isChecked ? "default" : "outline"}
+                size="lg"
+                className={`p-4 ${
+                  isToday ? 'p-4 ring-2 ring-offset-1 ring-blue-500' : ''
                 }`}
                 onClick={() => onToggleDay(habit.id, dateStr)}
               >
                 {dayNum}
               </Button>
-            );
+            )
           })}
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}

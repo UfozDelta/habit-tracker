@@ -3,12 +3,6 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-interface Habit {
-  id: string;
-  name: string;
-  checkedDays: Set<string>;
-}
-
 // HabitForm Component
 export const HabitForm = ({ 
   newHabitName, 
