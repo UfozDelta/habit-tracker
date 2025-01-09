@@ -101,6 +101,7 @@ export function HabitTracker({ initialHabits }: Props) {
     }
   }
 
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Habit Tracker</h1>

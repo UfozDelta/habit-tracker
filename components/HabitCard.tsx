@@ -5,6 +5,7 @@ import { format } from "date-fns"
 import { Trash2 } from "lucide-react"
 import { Button } from "./ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card"
+import Link from "next/link"
 
 interface Habit {
   id: string
@@ -35,10 +36,20 @@ export const HabitCard = ({
   const daysInMonth = getDaysInMonth(currentDate)
   const monthName = getMonthName(currentDate)
 
+  console.log(habit.id)
+
   return (
     <Card className="mb-4">
       <CardHeader className="py-2 flex flex-row items-center justify-between">
         <CardTitle className="text-lg">{habit.name}</CardTitle>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="h-8 w-8text-black-500 hover:text-black-700 hover:bg-gray-100"
+          asChild
+        >
+          <Link href={`/habits/${habit.id}`}>View More</Link>
+        </Button>
         <Button 
           variant="ghost" 
           size="icon"

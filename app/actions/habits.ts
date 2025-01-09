@@ -23,6 +23,26 @@ export async function getHabits() {
   }))
 }
 
+export async function getHabitById(habitId: string) {
+  const { userId: clerkId } = await auth()
+  if (!clerkId) throw new Error("Unauthorized")
+
+  const habit = await db.habit.findFirst({
+    where: {
+      id: habitId,
+      userId: clerkId
+    }
+  })
+
+  if (!habit) throw new Error("Habit not found")
+
+  return {
+    ...habit,
+    checkedDays: new Set(habit.checkedDays)
+  }
+}
+
+
 export async function createHabit(name: string) {
   const { userId: clerkId } = await auth()
   if (!clerkId) throw new Error("Unauthorized")
