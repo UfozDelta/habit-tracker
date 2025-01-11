@@ -20,14 +20,10 @@ const generateLastThirtyDays = (): Date[] => {
   })
 }
 
-export const HabitCard = ({
+export const HabitCardView = ({
   habit,
-  onToggleDay,
-  onDelete
 }: {
   habit: Habit
-  onToggleDay: (habitId: string, date: string) => void
-  onDelete: (habitId: string) => void
 }) => {
   const [isCornerHovered, setIsCornerHovered] = useState(false)
   const thirtyDays = generateLastThirtyDays()
@@ -35,34 +31,9 @@ export const HabitCard = ({
   return (
     <div className="relative mb-4">
       {/* Invisible hover detection area in the corner */}
-      <div 
-        className="absolute -top-3 -right-8 w-12 h-12 z-10"
-        onMouseEnter={() => setIsCornerHovered(true)}
-        onMouseLeave={() => setIsCornerHovered(false)}
-      >
-        <Button
-          variant="destructive"
-          size="icon"
-          onClick={() => onDelete(habit.id)}
-          className={`h-8 w-8 rounded-full shadow-lg transition-opacity duration-200 ${
-            isCornerHovered ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-
       <Card>
         <CardHeader className="py-2 flex flex-row items-center justify-between">
           <CardTitle className="text-lg">{habit.name}</CardTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-black-500 hover:text-black-700 hover:bg-gray-200"
-            asChild
-          >
-            <Link href={`/habits/${habit.id}`}><Fullscreen /></Link>
-          </Button>
         </CardHeader>
         <CardContent className="py-2">
           <div className="text-sm font-medium mb-2">
@@ -79,7 +50,6 @@ export const HabitCard = ({
                   variant={isChecked ? "default" : "outline"}
                   size="lg"
                   className="p-4"
-                  onClick={() => onToggleDay(habit.id, dateStr)}
                 >
                   {index + 1}
                 </Button>

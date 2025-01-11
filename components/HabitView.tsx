@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { format } from 'date-fns'
-import { Card, CardHeader, CardTitle, CardContent } from './ui/card'
-import { Button } from './ui/button'
+import { format, addDays, subDays, differenceInDays, isWithinInterval } from 'date-fns'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Calendar, Trophy, TrendingUp, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { Progress } from '@/components/ui/progress'
+import { HabitCardView } from './HabitCardView'
 
 interface Habit {
   id: string
@@ -22,124 +24,109 @@ interface HabitViewProps {
 const HabitView = ({ initialHabit }: HabitViewProps) => {
   const [habit] = useState(initialHabit)
 
-  // Convert checkedDays Set to sorted array
   const checkedDaysArray = Array.from(habit.checkedDays)
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
 
-  const totalCompletions = checkedDaysArray.length
+  const generateLastThirtyDays = (): Date[] => {
+    const today = new Date()
+    return Array.from({ length: 30 }, (_, i) => {
+      return subDays(today, 29 - i)
+    })
+  }
+
+  const thirtyDays = generateLastThirtyDays()
+  
+  // Calculate completions only within the last 30 days
+  const completionsInPeriod = checkedDaysArray.filter(date => {
+    const checkDate = new Date(date)
+    return isWithinInterval(checkDate, {
+      start: thirtyDays[0],
+      end: thirtyDays[29]
+    })
+  }).length
+
+  // Calculate completion rate based on last 30 days
+  const completionRate = Math.round((completionsInPeriod / 30) * 100)
+
   const lastCompleted = checkedDaysArray.length > 0 
     ? new Date(checkedDaysArray[0])
     : null
 
-  // Calculate completion rate
-  const daysSinceCreation = Math.ceil(
-    (new Date().getTime() - new Date(habit.createdAt).getTime()) / (1000 * 60 * 60 * 24)
-  )
-  const completionRate = Math.round((totalCompletions / daysSinceCreation) * 100)
-
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <div className="flex items-center mb-6">
+    <div className="min-h-screen p-8 bg-background">
+      <div className="max-w-4xl mx-auto">
         <Button 
           variant="ghost" 
           size="sm" 
           asChild 
-          className="mr-4"
+          className="mb-8"
         >
           <Link href="/">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Habits
           </Link>
         </Button>
-      </div>
 
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">{habit.name}</h1>
-        <p className="text-gray-600">
-          Started on {format(new Date(habit.createdAt), 'MMMM d, yyyy')}
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Completions</CardTitle>
-            <Trophy className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalCompletions}</div>
-            <p className="text-sm text-gray-600">
-              {completionRate}% completion rate
+        <Card className="mb-8">
+          <CardContent className="pt-6">
+            <h1 className="text-4xl font-bold mb-2">{habit.name}</h1>
+            <p className="text-muted-foreground">
+              Started on {format(new Date(habit.createdAt), 'MMMM d, yyyy')}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {calculateStreak(checkedDaysArray)} days
-            </div>
-            <p className="text-sm text-gray-600">Keep it going!</p>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <StatsCard
+            title="30-Day Completions"
+            value={completionsInPeriod}
+            icon={<Trophy className="h-5 w-5 text-yellow-500" />}
+            subtext={`${completionRate}% completion rate`}
+          >
+            <Progress value={completionRate} className="mt-2" />
+          </StatsCard>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Last Completed</CardTitle>
-            <Calendar className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {lastCompleted 
-                ? format(lastCompleted, 'MMM d')
-                : 'Never'}
-            </div>
-            {lastCompleted && (
-              <p className="text-sm text-gray-600">
-                {format(lastCompleted, 'EEEE')}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          <StatsCard
+            title="Current Streak"
+            value={`${calculateStreak(checkedDaysArray)} days`}
+            icon={<TrendingUp className="h-5 w-5 text-green-500" />}
+            subtext="Keep it going!"
+          />
+
+          <StatsCard
+            title="Last Completed"
+            value={lastCompleted ? format(lastCompleted, 'MMM d') : 'Never'}
+            icon={<Calendar className="h-5 w-5 text-blue-500" />}
+            subtext={lastCompleted ? format(lastCompleted, 'EEEE') : ''}
+          />
+        </div>
+
+        <HabitCardView
+          habit={{
+            id: habit.id,
+            name: habit.name,
+            checkedDays: habit.checkedDays,
+          }}
+        />
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Completions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {checkedDaysArray.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">
-              No completions recorded yet. Start building your streak!
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {checkedDaysArray.slice(0, 30).map((date) => (
-                <div 
-                  key={date} 
-                  className="flex items-center justify-between border-b py-2"
-                >
-                  <span className="font-medium">
-                    {format(new Date(date), 'EEEE, MMMM d')}
-                  </span>
-                  <span className="text-green-500 font-medium">
-                    Completed
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   )
 }
 
-// Helper function to calculate current streak
+const StatsCard = ({ title, value, icon, subtext, children }: any) => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      {icon}
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold">{value}</div>
+      <p className="text-sm text-muted-foreground">{subtext}</p>
+      {children}
+    </CardContent>
+  </Card>
+)
+
 function calculateStreak(dates: string[]): number {
   if (dates.length === 0) return 0
   

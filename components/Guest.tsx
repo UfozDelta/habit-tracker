@@ -4,12 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import DemoHabit from './DemoHabit';
 
-// const exampleHabit = {
-//   id: 'example',
-//   name: 'Daily Exercise',
-//   checkedDays: new Set(['2023-04-01', '2023-04-02', '2023-04-03', '2023-04-05', '2023-04-07', '2023-04-08', '2023-04-10', '2023-04-12', '2023-04-14', '2023-04-15'])
-// };
-
 export default function GuestPage() {
   return (
     <div className="container mx-auto p-4 max-w-2xl">
